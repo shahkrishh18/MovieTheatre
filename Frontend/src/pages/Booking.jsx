@@ -16,7 +16,7 @@ function Booking() {
         setLoading(true);
         setError('');
         const token = localStorage.getItem('token');
-        if (!token) { nav('/login'); return; }
+        if (!token) { nav(''); return; }
         const res = await fetch(`${API_BASE}/bookings/my-bookings`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });

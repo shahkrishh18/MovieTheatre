@@ -21,7 +21,7 @@ const Movies = () => {
       
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login');
+        navigate('');
         return;
       }
 
@@ -37,7 +37,7 @@ const Movies = () => {
         if (response.status === 401) {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          navigate('/login');
+          navigate('');
           return;
         }
         throw new Error(`Failed to fetch movies: ${response.status}`);

@@ -56,7 +56,7 @@ function TicketBooking() {
           if (!movie || !selectedShowtimeId) return;
           const token = localStorage.getItem('token');
           if (!token) {
-            navigate('/login');
+            navigate('');
             return;
           }
           const res = await fetch(`${API_BASE}/movies/${movie._id}/showtimes/${selectedShowtimeId}/seats`, {
