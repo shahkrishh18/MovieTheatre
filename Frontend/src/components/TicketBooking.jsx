@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from './Navbar'
-import { ArrowLeft, Clock, Calendar } from 'lucide-react'
+import { ArrowLeft, Ticket } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,8 +17,7 @@ function TicketBooking() {
     const [bookedSeats, setBookedSeats] = useState([]); // numbers
     const [basePrice, setBasePrice] = useState(0);
     const [surcharge, setSurcharge] = useState(0); // kept for compatibility but UI uses percentage rules
-    const [showCelebration, setShowCelebration] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isBooking, setIsBooking] = useState(false);
 
     useEffect(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -186,7 +185,7 @@ function TicketBooking() {
     return (
         <div className='flex flex-col min-h-screen w-full bg-[#030213]'>
             <Navbar />
-            <div className='container mx-auto py-3 px-6 flex-1' >
+            <div className='container h-full mx-auto py-3 px-6 flex-1' >
                 <button className='flex flex-row items-center mb-5' onClick={() => navigate(-1)}>
                     <ArrowLeft size={20} className='text-gray-300 hover:cursor-pointer mr-4' />
                     <h2 className='text-lg text-gray-300'>Movies</h2>
@@ -197,7 +196,7 @@ function TicketBooking() {
                         <img 
                         src={movie.poster || `https://placehold.co/300x400/1e293b/ffffff?text=${encodeURIComponent(String(movie.title || 'Movie'))}`} 
                         alt={movie.title} 
-                        className="w-80 h-80 object-cover rounded-lg"
+                        className="w-100 h-50 object-cover rounded-lg"
                         onError={(e) => {
                             const fallback = `https://placehold.co/300x400/1e293b/ffffff?text=${encodeURIComponent(String(movie.title || 'Movie'))}`;
                             if (e.currentTarget.src !== fallback) {
@@ -213,7 +212,7 @@ function TicketBooking() {
                         <div className='flex flex-row gap-3'>
                             <p className='text-gray-200'>Genre: {Array.isArray(movie.genre) ? movie.genre.join(', ') : String(movie.genre || '')}</p>
                             <p className='text-gray-200'>Duration: {movie.duration ? String(movie.duration) : ''} mins</p>
-                            <p className='text-gray-200'>Rating: {movie.rating || 'PG-13'}</p>
+                            <p className='text-gray-200'>Rating: {movie.rating || 'PG-13'}/10</p>
                         </div>
                     </div>
                     </div>
@@ -406,7 +405,20 @@ function TicketBooking() {
                                 </div>
 
                                 <div className="border-t border-[#334155] pt-4">
-                                    <div className="flex justify-between items-center mb-2">
+                                    {selectedSeats.length === 0 ? (
+                                      <div className="rounded-md bg-[#0b1220] border border-[#1f2a44] p-4 text-center mb-2">
+                                        <div className="flex items-center justify-center mb-2">
+                                          {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" className="text-gray-400" fill="currentColor" aria-hidden>
+                                            <path d="M6 10a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-4zM5 7a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1z"/>
+                                          </svg> */}
+                                          <Ticket size={50} className="text-red-400 rotate-150" />
+                                        </div>
+                                        <p className="text-gray-200 font-medium">No seats selected</p>
+                                        <p className="text-gray-400 text-sm">Pick your seats to see pricing and totals</p>
+                                        
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-between items-center mb-2">
                                         <span className="text-gray-400">Tickets ({selectedSeats.length})</span>
                                         <span className="text-white space-x-2">
                                           <span>₹{getCurrentPrice()} × {selectedSeats.filter(s => !isPrimeSeat(s) && !isCoupleSeat(s) && !isAccessibleSeat(s)).length}</span>
@@ -420,7 +432,8 @@ function TicketBooking() {
                                             <span>+ ₹{Math.round(getCurrentPrice() * 0.90)} × {selectedSeats.filter(isAccessibleSeat).length}</span>
                                           )}
                                         </span>
-                                    </div>
+                                      </div>
+                                    )}
                                     <div className="flex justify-between items-center pt-4 border-t border-[#334155]">
                                         <span className="text-lg font-semibold text-white">Total</span>
                                         <span className="text-2xl font-bold text-red-500">₹{totalPrice}</span>
@@ -429,7 +442,8 @@ function TicketBooking() {
 
                                 <button
                                     onClick={async () => {
-                                      if (selectedSeats.length === 0) return;
+                                      if (selectedSeats.length === 0 || isBooking) return;
+                                      setIsBooking(true);
                                       try {
                                         const token = localStorage.getItem('token');
                                         if (!token) { navigate('/login'); return; }
@@ -440,28 +454,33 @@ function TicketBooking() {
                                         });
                                         const data = await res.json();
                                         if (!res.ok || !data.success) {
+                                          toast.dismiss();
                                           toast.error(data.message || 'Failed to book seats');
                                           // refresh seat map in case of conflict
                                           setSelectedSeats([]);
                                           return;
                                         }
+                                        toast.dismiss();
                                         notify();
-                                        setShowCelebration(true);
-                                        setTimeout(() => { setShowCelebration(false); navigate('/my-bookings'); }, 1600);
+                                        // optional: navigate after short delay
+                                        setTimeout(() => { navigate('/my-bookings'); }, 800);
                                       } catch (e) {
+                                        toast.dismiss();
                                         toast.error('Booking failed');
+                                      } finally {
+                                        setIsBooking(false);
                                       }
                                     }}
-                                    disabled={selectedSeats.length === 0}
+                                    disabled={selectedSeats.length === 0 || isBooking}
                                     className={`
                                         w-full py-2 px-4 rounded-lg font-semibold text-white transition-all duration-200
-                                        ${selectedSeats.length > 0
+                                        ${selectedSeats.length > 0 && !isBooking
                                             ? 'bg-red-600 hover:bg-red-700 hover:scale-105'
                                             : 'bg-gray-600 cursor-not-allowed'
                                         }
                                     `}
                                 >
-                                    {selectedSeats.length > 0 ? 'Confirm Booking' : 'Select Seats'}
+                                    {isBooking ? 'Processing...' : (selectedSeats.length > 0 ? 'Confirm Booking' : 'Select Seats')}
                                 </button>
                                 <ToastContainer position="bottom-center" autoClose={2500} />
                             </div>
@@ -469,19 +488,6 @@ function TicketBooking() {
                     </div>
                 </div>
             </div>
-            {showCelebration && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-                <div className="popcorn-container text-center">
-                  <div className="popcorn-bucket mx-auto"></div>
-                  <div className="kernels">
-                    {Array.from({ length: 14 }).map((_, i) => (
-                      <span key={i} className={`kernel kernel-${i+1}`}></span>
-                    ))}
-                  </div>
-                  <p className="mt-4 text-white text-xl font-semibold">Completed!</p>
-                </div>
-              </div>
-            )}
         </div>
     )
 }

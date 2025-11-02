@@ -36,7 +36,7 @@ function Booking() {
   }, [nav]);
 
   return (
-    <div className='flex flex-col h-screen w-full bg-[#030213]'>
+    <div className='flex flex-col min-h-screen w-full bg-[#030213]'>
       <Navbar />
       <div className="container mx-auto py-3 px-6 flex-1">
         <div className="my-6">
