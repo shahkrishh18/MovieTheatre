@@ -14,6 +14,7 @@ const app = express();
 // Middleware
 const allowedOrigins = [
   'https://movie-theatre-one.vercel.app',
+  'https://moviemaxtime.netlify.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 ];
