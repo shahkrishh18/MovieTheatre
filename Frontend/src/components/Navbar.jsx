@@ -45,18 +45,18 @@ const Navbar = () => {
       {/* Mobile menu button (hidden on desktop) */}
       <div className="md:hidden">
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <a 
-            href="/movies" 
+          <Link 
+            to="/movies" 
             className="text-gray-700 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
           >
             Movies
-          </a>
-          <a 
-            href="/my-bookings" 
+          </Link>
+          <Link 
+            to="/my-bookings" 
             className="text-gray-700 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
           >
             My Bookings
-          </a>
+          </Link>
         </div>
       </div>
     </nav>

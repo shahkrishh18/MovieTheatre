@@ -14,7 +14,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='*' element={<Navigate to='/movies' replace />} />
+        <Route path='*' element={<Navigate to='/login' replace />} />
         <Route path='/login' element={<Login />} /> 
         <Route path='/movies' element={
           <ProtectedRoute>
@@ -33,3 +33,4 @@ function App() {
 }
 
 export default App
+
