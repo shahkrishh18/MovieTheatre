@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 const allowedOrigins = [
-  'https://frontend-movie-3k0p.onrender.com',
+  'https://movietheatrefrontend.onrender.com',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 ];
