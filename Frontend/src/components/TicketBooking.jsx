@@ -10,19 +10,45 @@ function TicketBooking() {
     const location = useLocation();
     const navigate = useNavigate();
     const movie = location.state?.movie;
-    const showTimes = movie?.showtimes || [];
-    const [selectedShowtimeId, setSelectedShowtimeId] = useState(showTimes[0]?._id || '');
-    const [selectedShowtime, setSelectedShowtime] = useState(showTimes[0]?.time || '');
+    const [showTimes, setShowTimes] = useState(movie?.showtimes || []);
+    const [selectedShowtimeId, setSelectedShowtimeId] = useState('');
+    const [selectedShowtime, setSelectedShowtime] = useState('');
     const [selectedSeats, setSelectedSeats] = useState([]); // numbers
     const [bookedSeats, setBookedSeats] = useState([]); // numbers
     const [basePrice, setBasePrice] = useState(0);
-    const [surcharge, setSurcharge] = useState(0);
+    const [surcharge, setSurcharge] = useState(0); // kept for compatibility but UI uses percentage rules
     const [showCelebration, setShowCelebration] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     useEffect(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
+
+    // Fetch today's upcoming showtimes (hide past)
+    useEffect(() => {
+      const fetchToday = async () => {
+        if (!movie?._id) return;
+        try {
+          const res = await fetch(`${API_BASE}/movies/${movie._id}/today-showtimes`);
+          const data = await res.json();
+          if (data?.success && Array.isArray(data.data)) {
+            setShowTimes(data.data);
+            if (data.data.length > 0) {
+              const upcoming = data.data.find(st => !st.isPast);
+              const pick = upcoming || data.data[0];
+              setSelectedShowtimeId(pick?._id || '');
+              setSelectedShowtime(pick?.time || '');
+            } else {
+              setSelectedShowtimeId('');
+              setSelectedShowtime('');
+            }
+          }
+        } catch (e) {
+          // fallback to existing
+        }
+      };
+      fetchToday();
+    }, [movie]);
 
     // Fetch booked seats for selected showtime
     useEffect(() => {
@@ -79,6 +105,20 @@ function TicketBooking() {
     const isCoupleStart = (rowLetter, col) => (coupleStartsByRow[rowLetter] || []).includes(col);
     const aisleAfters = [4, 10]; // visual gaps after these columns
 
+    const isCoupleSeat = (seatNumber) => {
+      const rowIndex = Math.floor((seatNumber - 1) / seatsPerRow);
+      const rowLetter = rows[rowIndex];
+      const col = ((seatNumber - 1) % seatsPerRow) + 1;
+      const starts = coupleStartsByRow[rowLetter] || [];
+      return starts.includes(col) || starts.includes(col - 1);
+    };
+    const isAccessibleSeat = (seatNumber) => {
+      const rowIndex = Math.floor((seatNumber - 1) * 1.0 / seatsPerRow);
+      const rowLetter = rows[rowIndex];
+      const col = ((seatNumber - 1) % seatsPerRow) + 1;
+      return isWheelchair(rowLetter, col);
+    };
+
     const toggleSeat = (seatNumbers) => {
         const seatArray = Array.isArray(seatNumbers) ? seatNumbers : [seatNumbers];
         setSelectedSeats(prev => {
@@ -121,10 +161,14 @@ function TicketBooking() {
         return 'bg-[#1e293b] border-gray-500 hover:border-red-400';
     };
 
-    const totalPrice = selectedSeats.reduce((sum, seat) => {
-      const extra = isPrimeSeat(seat) ? surcharge : 0;
-      return sum + getCurrentPrice() + extra;
-    }, 0);
+    const priceForSeat = (seat) => {
+      const base = getCurrentPrice();
+      if (isAccessibleSeat(seat)) return Math.round(base * 0.9);
+      if (isCoupleSeat(seat)) return Math.round(base * 1.10);
+      if (isPrimeSeat(seat)) return Math.round(base * 1.25);
+      return base;
+    };
+    const totalPrice = selectedSeats.reduce((sum, seat) => sum + priceForSeat(seat), 0);
 
     if (!movie) {
         return (
@@ -179,17 +223,24 @@ function TicketBooking() {
                 <div className='mb-8'>
                     <p className='text-white font-semibold text-xl mb-4'>Select Showtime</p>
                     <div className="flex flex-wrap gap-4">
+                        {showTimes.length === 0 && (
+                          <span className="text-gray-400">No more showtimes today</span>
+                        )}
                         {showTimes.map((showtime) => (
                             <button
                                 key={showtime._id}
-                                onClick={() => { setSelectedShowtimeId(showtime._id); setSelectedShowtime(showtime.time); }}
-                                className={`px-2 py-2 rounded-lg font-medium transition-all duration-200 ${
+                                onClick={() => { if (!showtime.isPast) { setSelectedShowtimeId(showtime._id); setSelectedShowtime(showtime.time); } }}
+                                disabled={!!showtime.isPast}
+                                className={`px-2 py-2 rounded-lg font-medium transition-all duration-200 relative ${
                                     selectedShowtimeId === showtime._id
                                         ? 'bg-red-600 text-white'
                                         : 'bg-[#0f172a] text-gray-300 hover:bg-[#1e293b] border border-[#334155]'
-                                }`}
+                                } ${showtime.isPast ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {showtime.time} &nbsp; ₹{showtime.price}
+                                {showtime.isPast && (
+                                  <span className="absolute -top-2 -right-2 text-[10px] bg-gray-700 text-gray-200 px-1.5 py-0.5 rounded">Past</span>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -227,15 +278,15 @@ function TicketBooking() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-[#1e293b] border border-amber-400 rounded-sm"></div>
-                                    <span className="text-gray-400 text-sm">Prime (+₹{surcharge})</span>
+                                    <span className="text-gray-400 text-sm">Prime (+25%)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-[#1e293b] border border-violet-400 rounded-sm"></div>
-                                    <span className="text-gray-400 text-sm">Couple (2 seats)</span>
+                                    <span className="text-gray-400 text-sm">Couple (+10%)</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <div className="w-4 h-4 bg-[#1e293b] border border-sky-400 rounded-sm"></div>
-                                    <span className="text-gray-400 text-sm">Accessible</span>
+                                    <span className="text-gray-400 text-sm">Accessible (-10%)</span>
                                 </div>
                             </div>
 
@@ -357,10 +408,16 @@ function TicketBooking() {
                                 <div className="border-t border-[#334155] pt-4">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-gray-400">Tickets ({selectedSeats.length})</span>
-                                        <span className="text-white">
-                                          ₹{getCurrentPrice()} × {selectedSeats.length - selectedSeats.filter(isPrimeSeat).length}
-                                          {selectedSeats.filter(isPrimeSeat).length > 0 && (
-                                            <> &nbsp; + &nbsp; ₹{getCurrentPrice() + surcharge} × {selectedSeats.filter(isPrimeSeat).length}</>
+                                        <span className="text-white space-x-2">
+                                          <span>₹{getCurrentPrice()} × {selectedSeats.filter(s => !isPrimeSeat(s) && !isCoupleSeat(s) && !isAccessibleSeat(s)).length}</span>
+                                          {selectedSeats.some(isPrimeSeat) && (
+                                            <span>+ ₹{Math.round(getCurrentPrice() * 1.25)} × {selectedSeats.filter(isPrimeSeat).length}</span>
+                                          )}
+                                          {selectedSeats.some(isCoupleSeat) && (
+                                            <span>+ ₹{Math.round(getCurrentPrice() * 1.10)} × {selectedSeats.filter(isCoupleSeat).length}</span>
+                                          )}
+                                          {selectedSeats.some(isAccessibleSeat) && (
+                                            <span>+ ₹{Math.round(getCurrentPrice() * 0.90)} × {selectedSeats.filter(isAccessibleSeat).length}</span>
                                           )}
                                         </span>
                                     </div>
