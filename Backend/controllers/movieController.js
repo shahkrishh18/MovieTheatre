@@ -110,9 +110,24 @@ const parseTime12h = (timeStr) => {
   return { hour: h, minute: min };
 };
 
+const parseTime24h = (timeStr) => {
+  // expects e.g. "15:00" or "9:05"
+  if (!timeStr) return null;
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return null;
+  let [, h, m] = match;
+  const hour = parseInt(h, 10);
+  const minute = parseInt(m, 10);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return null;
+  if (hour < 0 || hour > 23) return null;
+  if (minute < 0 || minute > 59) return null;
+  return { hour, minute };
+};
+
 const toDateTime = (dateVal, timeStr) => {
   const base = new Date(dateVal || new Date());
-  const t = parseTime12h(timeStr);
+  let t = parseTime12h(timeStr);
+  if (!t) t = parseTime24h(timeStr);
   if (!t) return new Date(base);
   const d = new Date(base);
   d.setHours(t.hour, t.minute, 0, 0);
@@ -245,6 +260,7 @@ const updateShowtime = async (req, res) => {
 };
 
 // Get today's showtimes for a movie between 9:00 and 23:00; mark past vs upcoming
+// If none for today, fall back to upcoming real showtimes (next ones within slot hours)
 const getTodayShowtimes = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -272,7 +288,28 @@ const getTodayShowtimes = async (req, res) => {
         isPast: dt < now
       }));
 
-    return res.json({ success: true, data: todayShows });
+    if (todayShows.length > 0) {
+      return res.json({ success: true, data: todayShows });
+    }
+
+    // Fallback: return upcoming real showtimes (within slot hours), limited to next 10
+    const upcoming = (movie.showtimes || [])
+      .map(st => ({ st, dt: toDateTime(st.date, st.time) }))
+      .filter(({ dt }) => dt >= now && dt.getHours() >= 9 && dt.getHours() <= 23)
+      .sort((a,b) => a.dt - b.dt)
+      .slice(0, 10)
+      .map(({ st, dt }) => ({
+        _id: st._id,
+        time: st.time,
+        date: dt,
+        screen: st.screen,
+        totalSeats: st.totalSeats,
+        price: adjustedPrice(st),
+        premiumSurcharge: st.premiumSurcharge || 0,
+        isPast: false
+      }));
+
+    return res.json({ success: true, data: upcoming });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Error fetching today showtimes', error: error.message });
   }

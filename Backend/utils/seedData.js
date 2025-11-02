@@ -162,9 +162,129 @@ const sampleMovies = [
         screen: "Screen 3",
         totalSeats: 120,
         price: 9.50
-      }
+      },
     ]
-  }
+  },
+  {
+    title: "Oppenheimer",
+    description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.",
+    genre: ["Biography", "Drama", "History"],
+    duration: 180,
+    poster: "https://i.pinimg.com/736x/d3/99/1a/d3991aa8b5708a0fe948ff25a4772509.jpg",
+    rating: 8.6,
+    showtimes: [
+      {
+        date: new Date('2024-12-21'),
+        time: "15:00",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+      {
+        date: new Date('2024-12-22'),
+        time: "19:15",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+    ]
+  },
+  {
+    title:"Spider-Man: No Way Home",
+    description:"Peter Parker’s identity is revealed, bringing his superhero responsibilities into conflict with his normal life.",
+    genre:["Action","Adventure","Sci-Fi"],
+    duration:148,
+    poster:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmAuAaWxjt3CxKaQMrjLMlA-whTvjial1Qu9MZmyzuq_5lnB23YoBzOrH0k29ggMd-i3yeSvAYCbiO8L98zl9X1v7_zABcHggRkqwrZi0_&s=10",
+    rating:8.2,
+    showtimes:[
+      {
+        date: new Date('2024-12-21'),
+        time: "15:00",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+      {
+        date: new Date('2024-12-22'),
+        time: "19:15",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+    ],
+  },
+  {
+    title:"Interstellar",
+    description:"A team of explorers travels through a wormhole in space in an attempt to ensure humanity's survival.",
+    genre:["Adventure","Drama","Sci-Fi"],
+    duration:169,
+    poster:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2F164l3556UGStHlwoVXoXA5WEG57uYhlfPOOHjeHIIVLOe-BKrR4oLPPAQUfYRL0Ql9_RCbqCxVfxfTkMriRxsw98HxMXcnvOvR7LPmNmg&s=10",
+    rating:8.7,
+    showtimes:[
+      {
+        date: new Date('2024-12-21'),
+        time: "15:00",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+      {
+        date: new Date('2024-12-22'),
+        time: "19:15",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+    ],
+  },
+  {
+    title:"Avengers: Endgame",
+    description:"After the devastating events of Infinity War, the Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.",
+    genre:["Action","Adventure","Drama"],
+    duration:181,
+    poster:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZn1zw4N4EgckrR-7-EbzjyDMbA7NQD7o2mQA0yDznfktmdGrEtX_XD9012y59oB45ugbY_NbCJtjn4ohCUmjzn4zS8qWfKJ56iffhha8gLA&s=10",
+    rating:8.4,
+    showtimes:[
+      {
+        date: new Date('2024-12-21'),
+        time: "15:00",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+      {
+        date: new Date('2024-12-22'),
+        time: "19:15",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+    ],
+  },
+  {
+    title:"Dune: Part Two",
+    description:"Paul Atreides unites with the Fremen to seek revenge against the conspirators who destroyed his family.",
+    genre:["Action","Adventure","Drama"],
+    duration:166,
+    poster:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwboWvdI89wR3k_fQuSP0RaoSThpBnlCf1KFS9XA1wmFWdFWxWFavfGAxYDdSr8ZfGSrMR2Z0YdOfnPUen6goO2fGAvQ6LcDZYrCxhPEe1&s=10",
+    rating:8.9,
+    showtimes:[
+      {
+        date: new Date('2024-12-21'),
+        time: "15:00",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+      {
+        date: new Date('2024-12-22'),
+        time: "19:15",
+        screen: "Screen 3",
+        totalSeats: 120,
+        price: 9.50
+      },
+    ],
+  },
 ];
 
 const seedDatabase = async () => {

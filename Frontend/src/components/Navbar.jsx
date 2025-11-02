@@ -1,9 +1,47 @@
 import { Film, Ticket } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../utils/auth';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [displayName, setDisplayName] = useState(() => {
+    try {
+      const u = localStorage.getItem('user');
+      if (!u) return '';
+      const obj = JSON.parse(u);
+      return (
+        obj?.name ||
+        obj?.fullName ||
+        obj?.user?.name ||
+        (typeof obj === 'object' && obj !== null && typeof obj.email === 'string' ? obj.email.split('@')[0] : '') ||
+        ''
+      );
+    } catch { return ''; }
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 401) {
+          logout();
+          navigate('/login');
+          return;
+        }
+        if (!res.ok) return;
+        const data = await res.json();
+        const name = data?.data?.user?.name || data?.data?.name || data?.user?.name || '';
+        if (name) setDisplayName(name);
+      } catch (_) {
+      }
+    })();
+  }, [navigate]);
 
   return (
     <nav className="z-50 bg-gray-800 items-center sticky top-0">
@@ -34,7 +72,7 @@ const Navbar = () => {
 
           <div className="flex items-center space-x-4">
             <span className="text-white text-lg font-medium">
-              Krish Shah
+              {displayName || 'User'}
             </span>
             <button onClick={() => { logout(); navigate('/login'); }} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
               Logout
