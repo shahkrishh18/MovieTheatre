@@ -13,7 +13,7 @@ const app = express();
 
 // Middleware
 const allowedOrigins = [
-  'https://movietheatrefrontend.onrender.com',
+  'https://movie-theatre-fl35oibil-jhonny-shahs-projects.vercel.app/',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 ];
