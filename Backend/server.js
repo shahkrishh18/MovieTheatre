@@ -12,8 +12,19 @@ connectDB();
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  'https://frontend-movie-3k0p.onrender.com',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+];
 app.use(cors({
-  origin:'*',
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
   credentials: true
 }));
 app.use(express.json());

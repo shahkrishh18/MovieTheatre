@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+/* Popcorn celebration overlay */
+.popcorn-container { position: relative; }
+.popcorn-bucket {
+  width: 120px; height: 140px;
+  background: repeating-linear-gradient(90deg, #e11d48 0 18px, #ffffff 18px 36px);
+  border-radius: 8px 8px 16px 16px;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+.popcorn-bucket::before {
+  content: '';
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: 100%; width: 140px; height: 36px;
+  background: radial-gradient(circle at 20% 50%, #ffdca8 0 10px, transparent 11px),
+              radial-gradient(circle at 50% 50%, #ffe5b9 0 11px, transparent 12px),
+              radial-gradient(circle at 80% 50%, #ffdca8 0 10px, transparent 11px);
+}
+.kernels { position: absolute; left: 50%; bottom: 88px; transform: translateX(-50%); pointer-events: none; }
+.kernel { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #ffe9c5; box-shadow: inset 0 -2px 0 #e7cfa6; opacity: 0; }
+@keyframes kernel-pop {
+  0% { transform: translate(0,0) scale(0.6) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(1) rotate(360deg); opacity: 0; }
+}
+/* Generate multiple kernels with different paths */
+.kernel-1 { --dx:-40px; --dy:-140px; animation: kernel-pop 1.2s ease-out 0s forwards; }
+.kernel-2 { --dx: 10px; --dy:-160px; animation: kernel-pop 1.25s ease-out .05s forwards; }
+.kernel-3 { --dx: 50px; --dy:-150px; animation: kernel-pop 1.1s ease-out .1s forwards; }
+.kernel-4 { --dx:-70px; --dy:-130px; animation: kernel-pop 1.05s ease-out .15s forwards; }
+.kernel-5 { --dx: 70px; --dy:-120px; animation: kernel-pop 1.15s ease-out .2s forwards; }
+.kernel-6 { --dx:-20px; --dy:-170px; animation: kernel-pop 1.3s ease-out .25s forwards; }
+.kernel-7 { --dx: 30px; --dy:-140px; animation: kernel-pop 1.1s ease-out .3s forwards; }
+.kernel-8 { --dx:-50px; --dy:-150px; animation: kernel-pop 1.2s ease-out .35s forwards; }
+.kernel-9 { --dx: 60px; --dy:-130px; animation: kernel-pop 1.2s ease-out .4s forwards; }
+.kernel-10{ --dx:-15px; --dy:-120px; animation: kernel-pop 1.05s ease-out .45s forwards; }
+.kernel-11{ --dx: 45px; --dy:-160px; animation: kernel-pop 1.3s ease-out .5s forwards; }
+.kernel-12{ --dx:-35px; --dy:-140px; animation: kernel-pop 1.15s ease-out .55s forwards; }
+.kernel-13{ --dx: 20px; --dy:-130px; animation: kernel-pop 1.1s ease-out .6s forwards; }
+.kernel-14{ --dx: -5px; --dy:-150px; animation: kernel-pop 1.2s ease-out .65s forwards; }

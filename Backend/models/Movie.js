@@ -17,10 +17,14 @@ const showtimeSchema = new mongoose.Schema({
     type: Number,
     default: 100
   },
-  bookedSeats: [{
-    type: Number,
+  bookedSeats: {
+    type: [Number],
     default: []
-  }],
+  },
+  premiumSurcharge: {
+    type: Number,
+    default: 50
+  },
   price: {
     type: Number,
     required: true

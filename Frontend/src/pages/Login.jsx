@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Film } from "lucide-react"
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE=import.meta.env.VITE_API_URL
+const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api'
 
 export default function Login() {
 

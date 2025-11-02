@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import { Search, Star, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE=import.meta.env.VITE_API_URL
+const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api'
 
 const Movies = () => {
 
@@ -112,7 +112,8 @@ const Movies = () => {
 
   const filteredMov=movies.filter((movie)=>{
     const matchSearch=movie.title.toLowerCase().includes(searchMov.toLowerCase());
-    const matchGenre= selectedGenre === 'All Genres' || movie.genre.toLowerCase().includes(selectedGenre.toLowerCase());
+    const genreString = Array.isArray(movie.genre) ? movie.genre.join(', ') : String(movie.genre || '');
+    const matchGenre= selectedGenre === 'All Genres' || genreString.toLowerCase().includes(selectedGenre.toLowerCase());
     return matchGenre && matchSearch;
   })
 
@@ -199,11 +200,11 @@ const Movies = () => {
           {filteredMov.map((movie) => (
             <div key={movie._id} className="bg-[#1e293b] rounded-lg overflow-hidden hover:border hover:border-red-500 transition-all duration-200 border border-[#334155]">
               <img
-                src={movie.poster || `https://via.placeholder.com/300x400/1e293b/ffffff?text=${encodeURIComponent(movie.title || 'Movie')}`}
+                src={movie.poster || `https://via.placeholder.com/300x400/1e293b/ffffff?text=${encodeURIComponent(String(movie.title || 'Movie'))}`}
                 alt={movie.title}
                 className="w-full h-64 sm:h-72 md:h-80 lg:h-96 object-contain object-cover"
                  onError={(e) => {
-                    e.target.src = `https://via.placeholder.com/300x400/1e293b/ffffff?text=${encodeURIComponent(movie.title || 'Movie')}`;
+                    e.target.src = `https://via.placeholder.com/300x400/1e293b/ffffff?text=${encodeURIComponent(String(movie.title || 'Movie'))}`;
                   }}
               />
               <div className="p-4">
@@ -211,8 +212,8 @@ const Movies = () => {
                   {movie.title}
                 </h3>
                 <div className="flex items-center justify-between text-sm text-gray-300 mb-3">
-                  <span>{movie.genre}</span>
-                  <span>{movie.duration}mins</span>
+                  <span>{Array.isArray(movie.genre) ? movie.genre.join(', ') : String(movie.genre || '')}</span>
+                  <span>{movie.duration ? String(movie.duration) : ''} mins</span>
                 </div>
                 <div className="flex items-center mb-4">
                   <Star className='text-yellow-400' fill='yellow' size={20} />

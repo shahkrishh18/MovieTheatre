@@ -15,69 +15,51 @@ const createBooking = async (req, res) => {
   try {
     const { movieId, showtimeId, seats } = req.body;
 
-    // Find movie and showtime
+    // Basic input checks
+    if (!movieId || !showtimeId || !Array.isArray(seats) || seats.length === 0) {
+      return res.status(400).json({ success: false, message: 'movieId, showtimeId and seats are required' });
+    }
+
+    // Ensure movie and showtime exist
     const movie = await Movie.findById(movieId);
     if (!movie) {
-      return res.status(404).json({
-        success: false,
-        message: 'Movie not found'
-      });
+      return res.status(404).json({ success: false, message: 'Movie not found' });
     }
-
     const showtime = movie.showtimes.id(showtimeId);
     if (!showtime) {
-      return res.status(404).json({
-        success: false,
-        message: 'Showtime not found'
-      });
+      return res.status(404).json({ success: false, message: 'Showtime not found' });
     }
 
-    // Check seat availability
-    const unavailableSeats = seats.filter(seat => 
-      showtime.bookedSeats.includes(seat)
+    // Atomic update: only add seats if none are currently booked
+    const updateResult = await Movie.updateOne(
+      { _id: movieId, showtimes: { $elemMatch: { _id: showtimeId, bookedSeats: { $nin: seats } } } },
+      { $addToSet: { 'showtimes.$.bookedSeats': { $each: seats } } },
+      {}
     );
 
-    if (unavailableSeats.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Seats ${unavailableSeats.join(', ')} are already booked`
-      });
+    if (updateResult.modifiedCount === 0) {
+      return res.status(409).json({ success: false, message: 'Some seats are already booked. Please refresh seat map.' });
     }
 
-    // Calculate total amount
-    const totalAmount = seats.length * showtime.price;
+    // Calculate total amount after successful seat lock
+    // If client provided a computed total (e.g., including prime surcharge), trust it for now.
+    // Fallback to base calculation.
+    const totalAmount = typeof req.body.totalAmount === 'number'
+      ? req.body.totalAmount
+      : seats.length * showtime.price;
 
-    // Create booking
-    const booking = await Booking.create({
+    const created = await Booking.create({
       user: req.user._id,
       movie: movieId,
-      showtime: {
-        date: showtime.date,
-        time: showtime.time,
-        screen: showtime.screen
-      },
+      showtime: { date: showtime.date, time: showtime.time, screen: showtime.screen },
       seats,
       totalAmount
     });
 
-    // Update booked seats
-    showtime.bookedSeats.push(...seats);
-    await movie.save();
-
-    // Populate booking details
-    await booking.populate('movie', 'title poster');
-
-    res.status(201).json({
-      success: true,
-      message: 'Booking confirmed successfully',
-      data: booking
-    });
+    await created.populate('movie', 'title poster');
+    return res.status(201).json({ success: true, message: 'Booking confirmed successfully', data: created });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating booking',
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: 'Error creating booking', error: error.message });
   }
 };
 

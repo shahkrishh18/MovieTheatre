@@ -77,7 +77,9 @@ const getAvailableSeats = async (req, res) => {
         availableSeats,
         totalSeats: showtime.totalSeats,
         bookedSeats: showtime.bookedSeats,
-        screen: showtime.screen
+        screen: showtime.screen,
+        price: showtime.price,
+        premiumSurcharge: showtime.premiumSurcharge || 0
       }
     });
   } catch (error) {
