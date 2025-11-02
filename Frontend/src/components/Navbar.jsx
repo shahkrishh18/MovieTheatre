@@ -1,8 +1,9 @@
 import { Film, Ticket } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../utils/auth';
 
 const Navbar = () => {
+  const navigate = useNavigate();
 
   return (
     <nav className="z-50 bg-gray-800 items-center sticky top-0">
@@ -35,7 +36,7 @@ const Navbar = () => {
             <span className="text-white text-lg font-medium">
               Krish Shah
             </span>
-            <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+            <button onClick={() => { logout(); navigate('/login'); }} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
               Logout
             </button>
           </div>

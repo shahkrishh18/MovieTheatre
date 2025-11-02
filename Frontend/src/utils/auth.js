@@ -21,7 +21,6 @@ export const isAuthenticated = () => {
 export const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
 };
 
 // Make authenticated API requests
