@@ -149,6 +149,14 @@ const adjustedPrice = (showtime) => {
   return Math.round(base * mult);
 };
 
+// Base price helper by hour group for initial seeding of showtimes
+const baseForHour = (h) => {
+  if (h < 12) return 160;   // Morning
+  if (h < 16) return 170;   // Matinee
+  if (h < 21) return 200;   // Evening
+  return 150;               // Late night
+};
+
 // Get available seats for a showtime
 const getAvailableSeats = async (req, res) => {
   try {
@@ -260,7 +268,7 @@ const updateShowtime = async (req, res) => {
 };
 
 // Get today's showtimes for a movie between 9:00 and 23:00; mark past vs upcoming
-// If none for today, fall back to upcoming real showtimes (next ones within slot hours)
+// If none for today, auto-create 5 default slots for TODAY with varying costs, then return them.
 const getTodayShowtimes = async (req, res) => {
   try {
     const movie = await Movie.findById(req.params.id);
@@ -292,12 +300,38 @@ const getTodayShowtimes = async (req, res) => {
       return res.json({ success: true, data: todayShows });
     }
 
-    // Fallback: return upcoming real showtimes (within slot hours), limited to next 10
-    const upcoming = (movie.showtimes || [])
+    // Auto-create 5 default slots for today if none exist
+    const desiredSlots = ['10:00 AM','01:00 PM','04:00 PM','07:00 PM','10:00 PM'];
+    let created = 0;
+    for (const t of desiredSlots) {
+      const dt = toDateTime(dayStart, t);
+      // skip if any existing showtime at same day and time
+      const exists = (movie.showtimes || []).some(st => {
+        const sdt = toDateTime(st.date, st.time);
+        return sdt.getFullYear() === dt.getFullYear() && sdt.getMonth() === dt.getMonth() && sdt.getDate() === dt.getDate() && st.time === t;
+      });
+      if (exists) continue;
+      const base = baseForHour(dt.getHours());
+      movie.showtimes.push({
+        time: t,
+        date: dt,
+        screen: movie.title?.slice(0,3).toUpperCase(),
+        totalSeats: 140,
+        bookedSeats: [],
+        price: base,
+        premiumSurcharge: 50
+      });
+      created++;
+    }
+    if (created > 0) {
+      await movie.save();
+    }
+
+    // Recompute today's shows after auto-creation
+    const refreshed = (movie.showtimes || [])
       .map(st => ({ st, dt: toDateTime(st.date, st.time) }))
-      .filter(({ dt }) => dt >= now && dt.getHours() >= 9 && dt.getHours() <= 23)
+      .filter(({ dt }) => dt >= dayStart && dt <= dayEnd && dt >= slotStart && dt <= slotEnd)
       .sort((a,b) => a.dt - b.dt)
-      .slice(0, 10)
       .map(({ st, dt }) => ({
         _id: st._id,
         time: st.time,
@@ -306,10 +340,10 @@ const getTodayShowtimes = async (req, res) => {
         totalSeats: st.totalSeats,
         price: adjustedPrice(st),
         premiumSurcharge: st.premiumSurcharge || 0,
-        isPast: false
+        isPast: dt < now
       }));
 
-    return res.json({ success: true, data: upcoming });
+    return res.json({ success: true, data: refreshed });
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Error fetching today showtimes', error: error.message });
   }
