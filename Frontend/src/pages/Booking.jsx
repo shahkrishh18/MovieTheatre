@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
-import { Calendar, Clock, IndianRupeeIcon, Sofa, Ticket } from 'lucide-react'
+import { Calendar, Clock, IndianRupeeIcon, Ticket } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
-const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 function Booking() {
   const [bookings, setBookings] = useState([]);

@@ -4,7 +4,8 @@ import { ArrowLeft, Ticket } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api';
+
+const API_BASE = import.meta.env.VITE_API_URL;
 
 function TicketBooking() {
     const location = useLocation();

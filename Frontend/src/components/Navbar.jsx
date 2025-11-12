@@ -2,7 +2,7 @@ import { Film, Ticket } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout } from '../utils/auth';
-const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const Navbar = () => {
   const navigate = useNavigate();

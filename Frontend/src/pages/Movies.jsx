@@ -3,7 +3,7 @@ import Navbar from '../components/Navbar';
 import { Search, Star, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api'
+const API_BASE = import.meta.env.VITE_API_URL
 
 const Movies = () => {
 
@@ -21,7 +21,7 @@ const Movies = () => {
       
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('');
+        navigate('/login');
         return;
       }
 
@@ -62,41 +62,6 @@ const Movies = () => {
     fetchMovies();
     window.scrollTo({top:0, behavior:'smooth'});
   }, []);
-  
-  // const [movies] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Avatar: The Way of Water",
-  //     genre: "Sci-Fi/Action",
-  //     duration: "3h 12m",
-  //     rating: 4.5,
-  //     image: "https://m.media-amazon.com/images/M/MV5BYzg2NjNhNTctMjUxMi00ZWU4LWI3ZjYtNTI0NTQxNThjZTk2XkEyXkFqcGdeQXVyNzg5OTk2OA@@._V1_SY1000_SX677_AL_.jpg",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Black Panther: Wakanda Forever",
-  //     genre: "Action/Adventure",
-  //     duration: "2h 41m",
-  //     rating: 4.2,
-  //     image: "https://via.placeholder.com/300x400/EF4444/FFFFFF?text=Black+Panther",
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "The Batman",
-  //     genre: "Action/Crime",
-  //     duration: "2h 56m",
-  //     rating: 4.3,
-  //     image: "https://via.placeholder.com/300x400/000000/FFFFFF?text=Batman",
-  //   },
-  //   {
-  //     id: 4,
-  //     title: "Top Gun: Maverick",
-  //     genre: "Action/Drama",
-  //     duration: "2h 11m",
-  //     rating: 4.7,
-  //     image: "https://via.placeholder.com/300x400/F59E0B/FFFFFF?text=Top+Gun",
-  //   }
-  // ]);
 
   // Extract unique genres from movies
   const allGenres = ['All Genres'];
@@ -116,11 +81,6 @@ const Movies = () => {
     const matchGenre= selectedGenre === 'All Genres' || genreString.toLowerCase().includes(selectedGenre.toLowerCase());
     return matchGenre && matchSearch;
   })
-
-  // Handle movie click for booking
-  const handleBookTickets = (movie) => {
-    navigate('/book-ticket', { state: { movie } });
-  };
 
   // Retry loading movies
   const handleRetry = () => {

@@ -1,29 +1,23 @@
-// utils/auth.js
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://movietheatre-x72b.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-// Get stored token
 export const getToken = () => {
     return localStorage.getItem('token');
 };
 
-// Get user data
 export const getUser = () => {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
 };
 
-// Check if user is authenticated
 export const isAuthenticated = () => {
     return !!getToken();
 };
 
-// Logout user
 export const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
 };
 
-// Make authenticated API requests
 export const authFetch = async (url, options = {}) => {
     const token = getToken();
     
